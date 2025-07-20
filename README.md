@@ -9,7 +9,7 @@ Querying data from a database is a very common skill in data science. Structured
 
 In the context of the data science workflow, SQL is most commonly used when obtaining data, but can also be used for exploratory data analysis.
 
-This lab involves analyzing the Basketball (`ncaa_basketball`) data set in Google BigQuery to answer specficic questions. You will use Python's sqlite3 package to connect to the database (stored in the data subfolder); no new installations should be necessary.
+This lab involves analyzing the Basketball (`ncaa_basketball`) data set in Google BigQuery to answer specific questions.
 
 **Data set:** `bigquery-public-data.ncaa_basketball`
 
