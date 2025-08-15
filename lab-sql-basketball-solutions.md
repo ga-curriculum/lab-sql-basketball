@@ -267,6 +267,7 @@ ORDER BY avg_attendance DESC;
 SELECT 
   t.name AS team,
   t.conf_name AS conference,
+  -- COUNTIF counts rows where condition is true; dividing by COUNT(*) gives win percentage
   ROUND(100 * COUNTIF(g.h_points > g.a_points) / COUNT(*), 1) AS home_win_pct
 FROM `bigquery-public-data.ncaa_basketball.mbb_games_sr` g
 JOIN `bigquery-public-data.ncaa_basketball.mbb_teams` t 
@@ -364,10 +365,11 @@ SELECT
   team_name,
   scheduled_date,
   points,
+  -- Window function: calculates rolling average over current + 4 preceding rows
   AVG(points) OVER (
-    PARTITION BY season, team_name
+    PARTITION BY season, team_name  -- Separate calculation per team per season
     ORDER BY scheduled_date
-    ROWS BETWEEN 4 PRECEDING AND CURRENT ROW
+    ROWS BETWEEN 4 PRECEDING AND CURRENT ROW  -- Last 5 games including current
   ) AS rolling_avg_points_last_5
 FROM team_games
 WHERE team_name IS NOT NULL
@@ -413,9 +415,10 @@ SELECT
   t.conf_name,
   g.h_name AS team_name,
   AVG(g.attendance) AS avg_home_attendance,
+  -- RANK() assigns ranking within each conference; ties get same rank
   RANK() OVER (
-    PARTITION BY t.conf_name
-    ORDER BY AVG(g.attendance) DESC
+    PARTITION BY t.conf_name  -- Separate ranking per conference
+    ORDER BY AVG(g.attendance) DESC  -- Highest attendance gets rank 1
   ) AS attendance_rank_in_conf
 FROM `bigquery-public-data.ncaa_basketball.mbb_games_sr` g
 JOIN `bigquery-public-data.ncaa_basketball.mbb_teams` t
@@ -436,6 +439,7 @@ agg AS (
   SELECT 
     team_name,
     AVG(points) AS avg_points,
+    -- STDDEV_POP calculates population standard deviation (measure of consistency)
     STDDEV_POP(points) AS points_volatility,
     COUNT(*) AS games_played
   FROM team_points
@@ -475,10 +479,12 @@ team_yoy AS (
     team_name,
     season,
     avg_home_attendance,
+    -- LAG gets the previous row's value within the same partition (team)
     LAG(avg_home_attendance) OVER (
       PARTITION BY team_name
       ORDER BY season
     ) AS prev_season_attendance,
+    -- SAFE_DIVIDE returns NULL instead of error when dividing by zero or NULL
     SAFE_DIVIDE(
       avg_home_attendance - LAG(avg_home_attendance) OVER (PARTITION BY team_name ORDER BY season),
       LAG(avg_home_attendance) OVER (PARTITION BY team_name ORDER BY season)
@@ -499,8 +505,10 @@ ORDER BY team_name, season;
 WITH base AS (
   SELECT
     t.conf_name AS conference,
+    -- SAFE_DIVIDE prevents division by zero errors
     SAFE_DIVIDE(g.attendance, t.venue_capacity) AS fill_pct,
-    EXTRACT(DAYOFWEEK FROM g.scheduled_date) IN (1, 7) AS is_weekend  -- Sun=1, Sat=7
+    -- EXTRACT gets day of week (1=Sunday, 7=Saturday); IN checks if weekend
+    EXTRACT(DAYOFWEEK FROM g.scheduled_date) IN (1, 7) AS is_weekend
   FROM `bigquery-public-data.ncaa_basketball.mbb_games_sr` g
   JOIN `bigquery-public-data.ncaa_basketball.mbb_teams` t
     ON g.h_id = t.id
@@ -510,6 +518,7 @@ WITH base AS (
 agg AS (
   SELECT
     conference,
+    -- IF function: if condition is true, use fill_pct; otherwise NULL (excludes from AVG)
     AVG(IF(is_weekend, fill_pct, NULL)) AS weekend_fill,
     AVG(IF(NOT is_weekend, fill_pct, NULL)) AS weekday_fill
   FROM base
