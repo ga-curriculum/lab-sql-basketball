@@ -33,48 +33,49 @@ As a reminder, here is the **Query Order**
 
 2. Getting familiar with attendance numbers
    - Query: List games by attendance numbers (`ORDER BY`)
-   - Query: Calculate average attendance per venue (Basic aggregations)
-   - Query: Find highest attended games (`ORDER BY`, `LIMIT`)
+   - Query: Calculate average attendance in the league (Basic aggregations)
+   - Query: Find 15 highest attended games (`ORDER BY`, `LIMIT`)
 
 3. Basic game statistics
-   - Query: Calculate total points scored by teams (`SUM`)
-   - Query: Find average points per game (`AVG`)
-   - Query: Count number of games played (`COUNT`)
+   - Query: Calculate total points scored by teams when playing at home (`SUM`, `GROUPBY`)
+   - Query: Find average points per game when playing away (`AVG`,`GROUPBY`)
+   - Query: Find the total number of 'away' games played per team (`COUNT`)
 
 
 ## 2. Deep Diving into Performance
 1. Analyzing team performance patterns
-   - Query: Filter games by point difference (`WHERE`)
-   - Query: Find teams with consistent high scores (`GROUP BY`)
-   - Query: Compare home vs away performance (`JOIN`)
+   - Query: Find all games where the home team won by at least 20 point difference. (`WHERE`)
+   - Query: Find teams that consistently score a lot at home — average more than 80 points per home game. (`GROUP BY`, `HAVING`)
+   - Stretch Query: Compare home vs away performance for each team (`JOIN`, `GROUP BY`)
 
-2. Understanding venue impact
-   - Query: Correlate venue size with attendance (JOIN)
-   - Query: Find games with NULL attendance records (`NULL` handling)
-   - Query: Compare conference performance (Advanced JOINs)
+2. Exploring venue size and attendance patterns
+   - Query: Find games with NULL attendance records in your dataset (`NULL` handling)
+   - Query: Calculate average venue fill percentage for all dataset, (HINT: filter where attendance is not zero or null)
+   - Query: Examine whether teams with larger venues tend to attract higher home attendance (`JOIN`). For example you could:
+     - Explore at the team-level: venue capacity vs average home attendance
+     - Find the correlation between capacity and average home attendance
 
 3. Conference analysis
-   - Query: Combine regular season and playoff data (`UNION`)
-   - Query: Calculate conference-wide statistics (SQL Functions)
-   - Query: Find top-performing conferences (`GROUP BY`, `HAVING`)
+   - Query: Which Conferences have highest avg attendance? (try USING `ROUND`)
+   - Query: Compare the **home** win rate for the **'Eagles' team** across different conferences.
+   - Query: Calculate several conference-wide stats by season in a single query (include average points scored (home_points), average points conceded (away_points), average point difference, and average attendance)
 
 
 
-## Stretch (optional): Advanced Analytics
+## Stretch (optional): Advanced Queries
 1. Creating sophisticated performance metrics
-   - Query: Create win-loss ratio categories (`CASE` statements)
-   - Query: Calculate rolling average performance (Window Functions)
-   - Query: Compare team performance to conference average (Subqueries)
+   - Query: Calculate each team's overall win rate (home and away combined) and classify them as 'Elite', 'Strong', 'Average', or 'Underperforming' based on their win percentage (`CASE` statements)
+   - Query: Use a window function to calculate each team's rolling average points over their last 5 games (within the same season) (Window functions, CTEs)
+   - Query: Compare team performance to conference average by season (`Subqueries`)
 
 2. Building team profiles
-   - Query: Create comprehensive team statistics (CTEs)
-   - Query: Rank teams within conferences (Window Functions)
-   - Query: Identify consistent top performers (Subqueries, CASE)
+   - Query: Rank teams within conferences by average attendance at home (Window Functions)
+   - Query: Identify consistent top performers: Analyse each team's scoring consistency by calculating their average points, scoring volatility (using `STDDEV_POP`), and games played, then label teams as 'Consistent Top Performer', 'High Scoring', or 'Other' based on these metrics (using `CASE` statements).
 
 3. Attendance analysis
-   - Query: Calculate year-over-year attendance growth (Window Functions)
-   - Query: Identify factors affecting attendance (Complex CTEs)
-   - Query: Create attendance categories and trends (`CASE`, Window Functions)
+   - Query: Calculate year-over-year attendance growth (Window Functions): Calculate each team's year-over-year growth in average home attendance and show only seasons where growth can be computed (excluding the first recorded season).
+   - Query: For each conference, compare the average venue fill rate on weekdays vs weekends and calculate the weekend impact as the percentage point difference.
+   - Query: "For the team 'Eagles', calculate their average home attendance in each conference and classify it into categories from Very High to Very Low Attendance."
 
 
 # Query Order Reminder for the stretch questions
